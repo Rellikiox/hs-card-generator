@@ -40,6 +40,20 @@ GOLDEN_CHANCE = {
     'l': 0.0731
 }
 
+DUST_VALUE = {
+    'c': (5, 50),
+    'r': (20, 100),
+    'e': (100, 400),
+    'l': (400, 1600)
+}
+
+MAX_COPIES = {
+    'c': 2,
+    'r': 2,
+    'e': 2,
+    'l': 1
+}
+
 
 class Collection(object):
 
@@ -48,10 +62,30 @@ class Collection(object):
             set_name: {rarity: defaultdict(int) for rarity, amount in rarity_amounts.iteritems()}
             for set_name, rarity_amounts in SETS.iteritems()
         }
+        self.dust = 0
 
     def open_pack(self, pack):
         for card in pack.cards:
-            self.cards[pack.set_name][card.rarity][card.index] += 1
+            self.cards[pack.set_name][card.rarity].setdefault(card.index, []).append(card)
+
+    def dissenchant_extras(self, keep_golden=False):
+        for set_name, rarities in self.cards.iteritems():
+            for rarity, cards in rarities.iteritems():
+                for card_index, copies in cards.iteritems():
+                    if len(copies) > MAX_COPIES[rarity]:
+                        self.dust += self.dissenchant_extra_copies(copies)
+
+    def dissenchant_extra_copies(self, copies):
+        dust = 0
+        max_copies = MAX_COPIES[copies[0].rarity]
+        while len(copies) > max_copies:
+            try:
+                card = next(copy for copy in copies if copy.golden)
+            except StopIteration:
+                card = copies[0]
+            copies.remove(card)
+            dust += card.dust_value()
+        return dust
 
 
 class Pack(object):
@@ -83,6 +117,9 @@ class Card(object):
         self.index = random.randint(0, SETS[set_name][self.rarity] - 1)
         # Try to upgrade to golden
         self.golden = GOLDEN_CHANCE[rarity] > random.random()
+
+    def dust_value(self):
+        return DUST_VALUE[self.rarity][1 if self.golden else 0]
 
     def __str__(self):
         return "{}{}{}".format(self.rarity, self.index, '*' if self.golden else '')

@@ -34,7 +34,10 @@ def main():
     c = Collection()
     for i in range(10):
         c.open_pack(Pack('classic'))
-    pprint(c.cards)
+    pprint(c.cards['classic'])
+    c.dissenchant_extras()
+    print c.dust
+    pprint(c.cards['classic'])
 
 
 if __name__ == '__main__':
