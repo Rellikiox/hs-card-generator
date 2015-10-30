@@ -4,6 +4,8 @@
 All numbers taken from http://hearthstone.gamepedia.com/Card_pack_statistics"""
 
 from pprint import pprint
+import random
+from collections import defaultdict
 
 from collection import Collection
 from collection import Pack
@@ -32,12 +34,14 @@ def simulate(runs=10000):
 
 def main():
     c = Collection()
-    for i in range(10):
-        c.open_pack(Pack('classic'))
-    pprint(c.cards['classic'])
-    c.dissenchant_extras()
-    print c.dust
-    pprint(c.cards['classic'])
+    packs_bougth = defaultdict(int)
+    while not c.is_complete():
+        set_name = random.choice(['classic', 'gvg', 'tgt'])
+        packs_bougth[set_name] += 1
+        c.open_pack(Pack(set_name))
+        c.dissenchant_extras()
+    pprint(packs_bougth)
+    print sum(packs_bougth.values())
 
 
 if __name__ == '__main__':

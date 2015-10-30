@@ -6,4 +6,5 @@
     - [ ] Find out the real rarity chances
 - [ ] Make collection logic
     - [x] "Open" packs
-    - [ ] Disenchant
+    - [x] Disenchant
+    - [ ] Expected pack value

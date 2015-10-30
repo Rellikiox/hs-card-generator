@@ -1,29 +1,13 @@
 
 from __future__ import division
-from collections import defaultdict
 import random
 
 import utils
 
 SETS = {
-    'classic': {
-        'c': 188,
-        'r': 162,
-        'e': 74,
-        'l': 33
-    },
-    'gvg': {
-        'c': 80,
-        'r': 74,
-        'e': 52,
-        'l': 20
-    },
-    'tgt': {
-        'c': 98,
-        'r': 72,
-        'e': 54,
-        'l': 20
-    }
+    'classic': {'c': 188, 'r': 162, 'e': 74, 'l': 33},
+    'gvg': {'c': 80, 'r': 74, 'e': 52, 'l': 20},
+    'tgt': {'c': 98, 'r': 72, 'e': 54, 'l': 20}
 }
 
 CHANCE = [
@@ -46,27 +30,31 @@ DUST_VALUE = {
     'e': (100, 400),
     'l': (400, 1600)
 }
-
-MAX_COPIES = {
-    'c': 2,
-    'r': 2,
-    'e': 2,
-    'l': 1
+DUST_COST = {
+    'c': (40, 400),
+    'r': (100, 800),
+    'e': (400, 1600),
+    'l': (1600, 3200)
 }
+
+MAX_COPIES = {'c': 2, 'r': 2, 'e': 2, 'l': 1}
 
 
 class Collection(object):
 
     def __init__(self):
         self.cards = {
-            set_name: {rarity: defaultdict(int) for rarity, amount in rarity_amounts.iteritems()}
-            for set_name, rarity_amounts in SETS.iteritems()
+            set_name: {
+                rarity: {
+                    index: [] for index in range(amount)
+                } for rarity, amount in rarity_amounts.iteritems()
+            } for set_name, rarity_amounts in SETS.iteritems()
         }
         self.dust = 0
 
     def open_pack(self, pack):
         for card in pack.cards:
-            self.cards[pack.set_name][card.rarity].setdefault(card.index, []).append(card)
+            self.cards[pack.set_name][card.rarity][card.index].append(card)
 
     def dissenchant_extras(self, keep_golden=False):
         for set_name, rarities in self.cards.iteritems():
@@ -77,7 +65,7 @@ class Collection(object):
 
     def dissenchant_extra_copies(self, copies, keep_golden):
         dust = 0
-        max_copies = MAX_COPIES[copies[0].rarity]
+        max_copies = self.max_copies(copies)
         while len(copies) > max_copies:
             try:
                 if keep_golden:
@@ -90,6 +78,22 @@ class Collection(object):
             copies.remove(card)
             dust += card.dust_value()
         return dust
+
+    def max_copies(self, copies):
+        return MAX_COPIES[copies[0].rarity]
+
+    def dust_until_full(self):
+        dust_needed = 0
+        for set_name, rarities in self.cards.iteritems():
+            for rarity, cards in rarities.iteritems():
+                for card_index, copies in cards.iteritems():
+                    copies_left = MAX_COPIES[rarity] - len(copies)
+                    if copies_left > 0:
+                        dust_needed += DUST_COST[rarity][0] * copies_left
+        return dust_needed
+
+    def is_complete(self):
+        return self.dust_until_full() < self.dust
 
 
 class Pack(object):
