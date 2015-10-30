@@ -4,7 +4,9 @@
 All numbers taken from http://hearthstone.gamepedia.com/Card_pack_statistics"""
 
 from __future__ import division
+from collections import defaultdict
 import random
+from pprint import pprint
 
 
 SETS = {
@@ -47,15 +49,20 @@ class Collection(object):
 
     def __init__(self):
         self.cards = {
-            set_name: {rarity: list(amount) for rarity, amount in rarity_amounts.iteritems()}
+            set_name: {rarity: defaultdict(int) for rarity, amount in rarity_amounts.iteritems()}
             for set_name, rarity_amounts in SETS.iteritems()
         }
+
+    def open_pack(self, pack):
+        for card in pack.cards:
+            self.cards[pack.set_name][card.rarity][card.index] += 1
 
 
 class Pack(object):
 
     def __init__(self, set_name):
         rolls = self.get_rolls()
+        self.set_name = set_name
         self.cards = [Card(set_name, rarity) for rarity in rolls]
 
     def get_rolls(self):
@@ -96,12 +103,12 @@ def weighted_choice(choices):
     assert False, "Shouldn't get here"
 
 
-def main():
+def simulate(runs=10000):
     common = 0
     rare = 0
     epic = 0
     legendary = 0
-    for i in range(100000):
+    for i in range(runs):
         pack = Pack('classic')
         for card in pack.cards:
             if card.rarity == 'c':
@@ -115,6 +122,13 @@ def main():
     print common, rare, epic, legendary
     total = common + rare + epic + legendary
     print common / total, rare / total, epic / total, legendary / total
+
+
+def main():
+    c = Collection()
+    for i in range(100):
+        c.open_pack(Pack('classic'))
+    pprint(c.cards)
 
 
 if __name__ == '__main__':

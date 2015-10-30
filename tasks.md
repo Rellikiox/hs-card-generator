@@ -3,6 +3,7 @@
 - [x] Make card and pack logic
     - [x] Roll cards
     - [x] Upgrade to golden
+    - [ ] Find out the real rarity chances
 - [ ] Make collection logic
-    - [ ] "Open" packs
+    - [x] "Open" packs
     - [ ] Disenchant
