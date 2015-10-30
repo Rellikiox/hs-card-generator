@@ -1,7 +1,8 @@
-Tasks:
-[] Make card and pack logic
-    - Roll cards
-    - Upgrade to golden
-[] Make collection logic
-    - "Open" packs
-    - Disenchant
+# Tasks
+
+- [x] Make card and pack logic
+    - [x] Roll cards
+    - [x] Upgrade to golden
+- [ ] Make collection logic
+    - [ ] "Open" packs
+    - [ ] Disenchant
