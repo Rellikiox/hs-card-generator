@@ -73,16 +73,20 @@ class Collection(object):
             for rarity, cards in rarities.iteritems():
                 for card_index, copies in cards.iteritems():
                     if len(copies) > MAX_COPIES[rarity]:
-                        self.dust += self.dissenchant_extra_copies(copies)
+                        self.dust += self.dissenchant_extra_copies(copies, keep_golden)
 
-    def dissenchant_extra_copies(self, copies):
+    def dissenchant_extra_copies(self, copies, keep_golden):
         dust = 0
         max_copies = MAX_COPIES[copies[0].rarity]
         while len(copies) > max_copies:
             try:
-                card = next(copy for copy in copies if copy.golden)
+                if keep_golden:
+                    card = next(copy for copy in copies if not copy.golden)
+                else:
+                    card = next(copy for copy in copies if copy.golden)
             except StopIteration:
                 card = copies[0]
+
             copies.remove(card)
             dust += card.dust_value()
         return dust
